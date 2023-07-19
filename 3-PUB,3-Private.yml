@@ -1,0 +1,151 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "aws cloud formation practise demo4"
+
+Parameters:
+  CIDR:
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedValues:
+      - 10.0.1.0/16
+      - 10.0.2.0/16
+      - 10.0.0.0/16
+    Description: "Default is 10.0.0.0/16"
+
+Resources:
+
+  myVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Ref "CIDR"
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: "Name"
+          Value: "YashwanthVPC"
+
+  mySubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref "myVPC"
+      CidrBlock: "10.0.1.0/24"
+      AvailabilityZone: "ap-south-1a"
+      Tags:
+        - Key: "Name"
+          Value: "Subnet1"
+
+  mySubnetB:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref "myVPC"
+      CidrBlock: "10.0.2.0/24"
+      AvailabilityZone: "ap-south-1b"
+      Tags:
+        - Key: "Name"
+          Value: "Subnet2"
+  
+  mySubnetC:
+      Type: "AWS::EC2::Subnet"
+      Properties:
+        VpcId: !Ref myVPC
+        CidrBlock: "10.0.3.0/24"
+        AvailabilityZone: "ap-south-1c"
+        Tags:
+          - Key: "Name"
+            Value: "Subnet3"
+
+  mySubnetD:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref "myVPC"
+      CidrBlock: "10.0.4.0/24"
+      AvailabilityZone: "ap-south-1a"
+      Tags:
+        - Key: "Name"
+          Value: "Subnet4"
+
+  mySubnetE:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref "myVPC"
+      CidrBlock: "10.0.5.0/24"
+      AvailabilityZone: "ap-south-1b"
+      Tags:
+        - Key: "Name"
+          Value: "Subnet5"
+  
+  mySubnetF:
+      Type: "AWS::EC2::Subnet"
+      Properties:
+        VpcId: !Ref myVPC
+        CidrBlock: "10.0.6.0/24"
+        AvailabilityZone: "ap-south-1c"
+        Tags:
+          - Key: "Name"
+            Value: "Subnet6"
+
+  myInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: IGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref "myVPC"
+      InternetGatewayId:
+        Ref: myInternetGateway
+
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+      - Key: Name
+        Value: PublicRT
+
+  myRoute:
+    Type: AWS::EC2::Route
+    DependsOn: myVPC
+    Properties:
+       RouteTableId:
+         Ref: PublicRT
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId: !Ref myInternetGateway
+
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetA
+      RouteTableId:
+        Ref: PublicRT
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetB
+      RouteTableId:
+        Ref: PublicRT
+  Subnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetC
+      RouteTableId:
+        Ref: PublicRT
+Outputs:
+  VPCname:
+    Description: "VPC Id"
+    Value: !Ref "myVPC"
+    Export:
+      Name: "VPCname"
+  
+  IGW:
+    Description: "myInternetGateway exporting"
+    Value: !Ref "myInternetGateway"
+    Export:
+      Name: "IGW"
